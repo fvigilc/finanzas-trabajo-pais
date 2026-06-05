@@ -101,6 +101,43 @@
   .metric-value.gray   { color:#555; }
   .metric-sub { font-size:11px; color:var(--texto-sec); margin-top:4px; }
 
+  /* ── ACORDEÓN ── */
+  .accordion-card {
+    background: var(--blanco);
+    border-radius: 10px;
+    border: 1px solid var(--borde);
+    box-shadow: var(--sombra);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .accordion-btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--azul);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .accordion-btn:hover { background: rgba(20,86,156,0.04); }
+  .acc-arrow { font-size: 11px; color: var(--texto-sec); transition: transform 0.2s; }
+  .acc-arrow.open { transform: rotate(180deg); }
+  .accordion-body {
+    display: none;
+    padding: 0 18px 16px;
+    border-top: 1px solid var(--crema-dark);
+  }
+  .accordion-body.open { display: block; }
+
   /* ── SEPARADOR ── */
   .section-sep { font-family:'Oswald',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--texto-sec); margin:1.5rem 0 0.75rem; padding-bottom:6px; border-bottom:2px solid var(--crema-dark); }
 
@@ -255,57 +292,136 @@
   <!-- ══════════ PESTAÑA 2: POR VÍA ══════════ -->
   <section id="tab-vias" class="section">
 
-    <!-- RIFAS -->
-    <div class="section-sep">Rifas</div>
-    <div class="metrics" id="met-rifas"></div>
-    <div class="card">
-      <h3>Rifas — Zonas</h3><div class="bars-list" id="v-rifas-zonas"></div>
-    </div>
-    <div class="card">
-      <h3>Rifas — Consejo</h3><div class="bars-list" id="v-rifas-consejo"></div>
-    </div>
-    <div class="card">
-      <h3>Rifas — Martín &amp; Flori</h3><div class="bars-list" id="v-rifas-finanzas"></div>
+    <!-- Resumen % por vía -->
+    <div class="card" style="margin-bottom:1.25rem;">
+      <h3>Distribución del total recaudado por vía</h3>
+      <div id="vias-pct-bars"></div>
     </div>
 
-    <!-- COLECTAS -->
-    <div class="section-sep">Colectas</div>
-    <div class="metrics" id="met-colectas"></div>
-    <div class="card">
-      <h3>Colectas — Zonas</h3><div class="bars-list" id="v-col-zonas"></div>
-    </div>
-    <div class="card">
-      <h3>Colectas — Consejo</h3><div class="bars-list" id="v-col-consejo"></div>
-    </div>
-    <div class="card">
-      <h3>Colectas — Martín &amp; Flori</h3><div class="bars-list" id="v-col-finanzas"></div>
+    <!-- Sub-tabs de vía -->
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="showVia('via-don',this)">Donaciones c/cert.</button>
+      <button class="inner-tab" onclick="showVia('via-ap',this)">Aportes simples</button>
+      <button class="inner-tab" onclick="showVia('via-rifas',this)">Rifas</button>
+      <button class="inner-tab" onclick="showVia('via-col',this)">Colectas</button>
     </div>
 
-    <!-- DONACIONES C/CERT -->
-    <div class="section-sep">Donaciones con certificado tributario</div>
-    <div class="metrics" id="met-don"></div>
-    <div class="card">
-      <h3>Donaciones c/cert. — Zonas</h3><div class="bars-list" id="v-don-zonas"></div>
-    </div>
-    <div class="card">
-      <h3>Donaciones c/cert. — Consejo</h3><div class="bars-list" id="v-don-consejo"></div>
-    </div>
-    <div class="card">
-      <h3>Donaciones c/cert. — Martín &amp; Flori</h3><div class="bars-list" id="v-don-finanzas"></div>
+    <!-- ── SUB-PANEL: DONACIONES ── -->
+    <div class="inner-panel active" id="via-don">
+      <div class="metrics" id="met-don"></div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-don-zonas')">
+          <span>Zonas</span><span class="acc-arrow" id="arr-don-zonas">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-don-zonas">
+          <div class="bars-list" id="v-don-zonas"></div>
+        </div>
+      </div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-don-consejo')">
+          <span>Consejo</span><span class="acc-arrow" id="arr-don-consejo">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-don-consejo">
+          <div class="bars-list" id="v-don-consejo"></div>
+        </div>
+      </div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-don-finanzas')">
+          <span>Martín &amp; Flori</span><span class="acc-arrow" id="arr-don-finanzas">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-don-finanzas">
+          <div class="bars-list" id="v-don-finanzas"></div>
+        </div>
+      </div>
     </div>
 
-    <!-- APORTES SIMPLES -->
-    <div class="section-sep">Aportes simples</div>
-    <div class="metrics" id="met-aportes"></div>
-    <div class="card">
-      <h3>Aportes simples — Zonas</h3><div class="bars-list" id="v-ap-zonas"></div>
+    <!-- ── SUB-PANEL: APORTES ── -->
+    <div class="inner-panel" id="via-ap">
+      <div class="metrics" id="met-aportes"></div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-ap-zonas')">
+          <span>Zonas</span><span class="acc-arrow" id="arr-ap-zonas">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-ap-zonas">
+          <div class="bars-list" id="v-ap-zonas"></div>
+        </div>
+      </div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-ap-consejo')">
+          <span>Consejo</span><span class="acc-arrow" id="arr-ap-consejo">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-ap-consejo">
+          <div class="bars-list" id="v-ap-consejo"></div>
+        </div>
+      </div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-ap-finanzas')">
+          <span>Martín &amp; Flori</span><span class="acc-arrow" id="arr-ap-finanzas">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-ap-finanzas">
+          <div class="bars-list" id="v-ap-finanzas"></div>
+        </div>
+      </div>
     </div>
-    <div class="card">
-      <h3>Aportes simples — Consejo</h3><div class="bars-list" id="v-ap-consejo"></div>
+
+    <!-- ── SUB-PANEL: RIFAS ── -->
+    <div class="inner-panel" id="via-rifas">
+      <div class="metrics" id="met-rifas"></div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-rifas-zonas')">
+          <span>Zonas</span><span class="acc-arrow" id="arr-rifas-zonas">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-rifas-zonas">
+          <div class="bars-list" id="v-rifas-zonas"></div>
+        </div>
+      </div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-rifas-consejo')">
+          <span>Consejo</span><span class="acc-arrow" id="arr-rifas-consejo">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-rifas-consejo">
+          <div class="bars-list" id="v-rifas-consejo"></div>
+        </div>
+      </div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-rifas-finanzas')">
+          <span>Martín &amp; Flori</span><span class="acc-arrow" id="arr-rifas-finanzas">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-rifas-finanzas">
+          <div class="bars-list" id="v-rifas-finanzas"></div>
+        </div>
+      </div>
     </div>
-    <div class="card">
-      <h3>Aportes simples — Martín &amp; Flori</h3><div class="bars-list" id="v-ap-finanzas"></div>
+
+    <!-- ── SUB-PANEL: COLECTAS ── -->
+    <div class="inner-panel" id="via-col">
+      <div class="metrics" id="met-colectas"></div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-col-zonas')">
+          <span>Zonas</span><span class="acc-arrow" id="arr-col-zonas">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-col-zonas">
+          <div class="bars-list" id="v-col-zonas"></div>
+        </div>
+      </div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-col-consejo')">
+          <span>Consejo</span><span class="acc-arrow" id="arr-col-consejo">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-col-consejo">
+          <div class="bars-list" id="v-col-consejo"></div>
+        </div>
+      </div>
+      <div class="accordion-card">
+        <button class="accordion-btn" onclick="toggleAccordion('acc-col-finanzas')">
+          <span>Martín &amp; Flori</span><span class="acc-arrow" id="arr-col-finanzas">▼</span>
+        </button>
+        <div class="accordion-body" id="acc-col-finanzas">
+          <div class="bars-list" id="v-col-finanzas"></div>
+        </div>
+      </div>
     </div>
+
   </section>
 
   <!-- ══════════ PESTAÑA 3: DESGLOSE POR GRUPO ══════════ -->
@@ -507,6 +623,47 @@ function showTab(name, btn) {
   btn.classList.add('active');
 }
 
+function showVia(panelId, btn) {
+  document.querySelectorAll('#tab-vias .inner-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#tab-vias .inner-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  btn.classList.add('active');
+}
+
+function renderViasPct() {
+  const totT = sum(zonas,'total') + sum(consejo,'total') + sum(finanzas,'total');
+  const vias = [
+    { lbl:'Donaciones c/certificado', key:'donaciones', color:'#14569c' },
+    { lbl:'Aportes simples',          key:'aportes',    color:'#c47a00' },
+    { lbl:'Rifas',                    key:'rifas',      color:'#d61d26' },
+    { lbl:'Colectas',                 key:'colectas',   color:'#1a7a4a' },
+  ];
+  const el = document.getElementById('vias-pct-bars');
+  if (!el) return;
+  el.innerHTML = vias.map(v => {
+    const val = sum(zonas,v.key) + sum(consejo,v.key) + sum(finanzas,v.key);
+    const p   = totT > 0 ? Math.round(val/totT*100) : 0;
+    const w   = Math.min(p, 100);
+    return `<div class="bar-row" style="margin-bottom:6px;">
+      <span class="bar-name" style="min-width:200px;max-width:200px;font-size:12px;">${v.lbl}</span>
+      <div class="bar-track" style="flex:1;">
+        <div class="bar-fill" style="width:${w}%;background:${v.color}"></div>
+      </div>
+      <span class="bar-pct" style="color:${v.color};min-width:42px;">${p}%</span>
+      <span class="bar-amt">${fmt(val)}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleAccordion(id) {
+  const body = document.getElementById(id);
+  const arrId = id.replace('acc-', 'arr-');
+  const arrow = document.getElementById(arrId);
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (arrow) arrow.classList.toggle('open', !isOpen);
+}
+
 function showInner(panelId, btn) {
   document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
@@ -672,6 +829,8 @@ renderHero();
 renderBars(zonas,    'res-zonas-bars');
 renderBars(consejo,  'res-consejo-bars');
 renderBars(finanzas, 'res-finanzas-bars');
+
+renderViasPct();
 
 // Pestaña 2 — Por vía
 renderMetCat('met-rifas',    'rifas');
