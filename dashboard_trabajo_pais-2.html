@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Trabajo País 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --rojo:#d61d26; --azul:#14569c; --crema:#f3f2ed; --crema-dark:#e8e7e0;
+    --azul-dark:#0e3e72; --verde:#1a7a4a; --amber:#c47a00; --morado:#6b3fa0;
+    --texto:#1a1a1a; --texto-sec:#666; --borde:rgba(20,86,156,0.12);
+    --blanco:#ffffff; --sombra:0 2px 12px rgba(20,86,156,0.07);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Source Sans 3',sans-serif; background:var(--crema); color:var(--texto); min-height:100vh; }
+
+  /* ── HEADER ── */
+  .header { background:var(--azul); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; border-bottom:4px solid var(--rojo);  }
+  .header-logo { display:flex; align-items:center; gap:14px; padding:14px 0; }
+  .logo-svg { height:48px; width:auto; }
+  .header-title { font-family:'Oswald',sans-serif; font-size:13px; font-weight:400; color:rgba(255,255,255,0.7); letter-spacing:0.12em; text-transform:uppercase; }
+  .countdown-box { background:var(--rojo); border-radius:7px; padding:7px 14px; text-align:center; min-width:115px; }
+  .countdown-days { font-family:'Oswald',sans-serif; font-size:32px; font-weight:700; color:#fff; line-height:1; }
+  .countdown-label { font-size:8px; font-weight:600; color:rgba(255,255,255,0.8); letter-spacing:0.1em; text-transform:uppercase; margin-top:3px; }
+
+  /* ── HERO ── */
+  .hero { background:var(--azul-dark); padding:2rem 2rem 2.5rem; }
+  .hero-inner { max-width:1100px; margin:0 auto; }
+  .hero-label { font-family:'Oswald',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:1rem; }
+  .hero-top { display:grid; grid-template-columns:1fr 1px 1fr 1px 1fr; gap:0; margin-bottom:1.75rem; align-items:center; }
+  .hero-divider { background:rgba(255,255,255,0.12); height:60px; align-self:center; }
+  .hero-stat { padding:0 2rem; text-align:center; }
+  .hero-stat:first-child { padding-left:0; text-align:left; }
+  .hero-stat:last-child  { padding-right:0; text-align:right; }
+  .hero-stat-label { font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.5); margin-bottom:4px; }
+  .hero-stat-value { font-family:'Oswald',sans-serif; font-size:40px; font-weight:700; line-height:1; color:#fff; }
+  .hero-stat-value.pct { color:#f3f2ed; font-size:48px; }
+  .hero-stat-value.falta { color:#f3a0a3; }
+  .hero-stat-sub { font-size:12px; color:rgba(255,255,255,0.45); margin-top:3px; }
+  .hero-bar-wrap { margin-bottom:1.5rem; }
+  .hero-bar-header { display:flex; justify-content:space-between; font-size:11px; color:rgba(255,255,255,0.45); margin-bottom:6px; }
+  .hero-track { height:14px; background:rgba(255,255,255,0.1); border-radius:99px; overflow:hidden; }
+  .hero-fill { height:100%; border-radius:99px; background:#fff; position:relative; }
+  .hero-fill::after { content:''; position:absolute; right:0; top:0; bottom:0; width:3px; background:rgba(255,255,255,0.6); border-radius:99px; }
+  .hero-sub-bars { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.25rem; }
+  .sub-bar-header { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px; }
+  .sub-bar-title { font-family:'Oswald',sans-serif; font-size:13px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.75); }
+  .sub-bar-pct { font-family:'Oswald',sans-serif; font-size:18px; font-weight:700; color:#fff; }
+  .sub-bar-amt { font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px; text-align:right; }
+  .sub-track { height:8px; background:rgba(255,255,255,0.1); border-radius:99px; overflow:hidden; }
+  .sub-fill { height:100%; border-radius:99px; }
+  .fill-verde { background:#4ade80; }
+  .fill-rojo  { background:#f3a0a3; }
+  .fill-morado{ background:#c084fc; }
+
+  /* ── MAIN ── */
+  .main { max-width:1100px; margin:0 auto; padding:1.75rem 1.5rem; }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:2px; margin-bottom:1.5rem; background:var(--crema-dark); border-radius:10px; padding:4px; }
+  .tab { flex:1; padding:10px 12px; font-family:'Oswald',sans-serif; font-size:13px; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; border:none; background:transparent; color:var(--texto-sec); border-radius:7px; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .tab.active { background:var(--azul); color:#fff; }
+  .tab:hover:not(.active) { background:rgba(20,86,156,0.1); color:var(--azul); }
+  .section { display:none; }
+  .section.active { display:block; }
+
+  /* ── PORCENTAJES GRANDES ── */
+  .pct-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:1.25rem; }
+  .pct-card { background:var(--blanco); border-radius:12px; padding:20px 22px; border:1px solid var(--borde); box-shadow:var(--sombra); }
+  .pct-card-label { font-family:'Oswald',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--texto-sec); margin-bottom:6px; }
+  .pct-card-value { font-family:'Oswald',sans-serif; font-size:44px; font-weight:700; line-height:1; margin-bottom:8px; }
+  .pct-card-track { height:8px; background:var(--crema-dark); border-radius:99px; overflow:hidden; margin-bottom:6px; }
+  .pct-card-fill { height:100%; border-radius:99px; }
+  .pct-card-sub { font-size:12px; color:var(--texto-sec); }
+
+  /* ── CARDS ── */
+  .card { background:var(--blanco); border-radius:12px; padding:20px 22px; border:1px solid var(--borde); box-shadow:var(--sombra); margin-bottom:1.25rem; }
+  .card h3 { font-family:'Oswald',sans-serif; font-size:15px; font-weight:500; letter-spacing:0.04em; text-transform:uppercase; color:var(--azul); margin-bottom:14px; }
+
+  /* ── BARS ── */
+  .bars-list { display:flex; flex-direction:column; gap:7px; }
+  .bar-row { display:flex; align-items:center; gap:10px; }
+  .bar-rank { font-family:'Oswald',sans-serif; font-size:12px; font-weight:600; color:var(--texto-sec); min-width:20px; text-align:right; }
+  .bar-name { font-size:12px; color:var(--texto); min-width:130px; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bar-track { flex:1; height:8px; background:var(--crema-dark); border-radius:99px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:99px; transition:width 0.6s ease; }
+  .bar-pct { font-family:'Oswald',sans-serif; font-size:12px; font-weight:500; min-width:42px; text-align:right; }
+  .bar-amt { font-size:11px; color:var(--texto-sec); min-width:68px; text-align:right; }
+
+  /* ── MÉTRICAS CAT ── */
+  .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:12px; margin-bottom:1.25rem; }
+  .metric { background:var(--blanco); border-radius:10px; padding:14px 16px; border:1px solid var(--borde); box-shadow:var(--sombra); }
+  .metric-label { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--texto-sec); margin-bottom:5px; }
+  .metric-value { font-family:'Oswald',sans-serif; font-size:26px; font-weight:600; line-height:1; color:var(--azul); }
+  .metric-value.red    { color:var(--rojo); }
+  .metric-value.green  { color:var(--verde); }
+  .metric-value.morado { color:var(--morado); }
+  .metric-value.gray   { color:#555; }
+  .metric-sub { font-size:11px; color:var(--texto-sec); margin-top:4px; }
+
+  /* ── SEPARADOR ── */
+  .section-sep { font-family:'Oswald',sans-serif; font-size:11px; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--texto-sec); margin:1.5rem 0 0.75rem; padding-bottom:6px; border-bottom:2px solid var(--crema-dark); }
+
+  /* ── DESGLOSE TABS internos ── */
+  .inner-tabs { display:flex; gap:4px; margin-bottom:1rem; flex-wrap:wrap; }
+  .inner-tab { padding:6px 14px; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:0.05em; text-transform:uppercase; border:1.5px solid var(--borde); background:transparent; color:var(--texto-sec); border-radius:6px; cursor:pointer; transition:all 0.15s; }
+  .inner-tab.active { background:var(--azul); color:#fff; border-color:var(--azul); }
+  .inner-panel { display:none; }
+  .inner-panel.active { display:block; }
+
+  /* ── FOOTER ── */
+  .footer { text-align:center; padding:1.5rem; font-size:11px; color:var(--texto-sec); letter-spacing:0.05em; border-top:1px solid var(--borde); margin-top:1rem; }
+
+  @media(max-width:700px){
+    .hero-top { grid-template-columns:1fr; gap:1rem; }
+    .hero-divider { display:none; }
+    .hero-stat { text-align:left !important; padding:0 !important; }
+    .hero-sub-bars { grid-template-columns:1fr; }
+    .pct-grid { grid-template-columns:1fr; }
+    .header { padding:0 1rem; }
+    .hero { padding:1.25rem 1rem 1.75rem; }
+    .main { padding:1.25rem 1rem; }
+    .tabs .tab { font-size:11px; padding:8px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo" style="flex:1;justify-content:space-between;">
+    <img src="data:image/jpeg;base64,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" class="logo-svg" alt="Trabajo País 20 años" style="height:100px;width:auto;object-fit:contain;">
+    <div style="flex:1;text-align:center;font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;color:rgba(255,255,255,0.9);letter-spacing:0.12em;text-transform:uppercase;">Finanzas Trabajo País</div>
+  </div>
+  <div class="countdown-box">
+    <div class="countdown-days" id="days-left">—</div>
+    <div class="countdown-label">días para Trabajo País</div>
+  </div>
+</header>
+
+<!-- HERO — siempre visible -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">Estado de recaudación — Trabajo País 2026</div>
+    <div class="hero-top">
+      <div class="hero-stat">
+        <div class="hero-stat-label">Recaudado</div>
+        <div class="hero-stat-value" id="h-recaudado">—</div>
+        <div class="hero-stat-sub" id="h-rec-sub">—</div>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat" style="text-align:center">
+        <div class="hero-stat-label">Avance total</div>
+        <div class="hero-stat-value pct" id="h-pct">—</div>
+        <div class="hero-stat-sub">a <span id="days-hero">—</span> días del cierre</div>
+      </div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">Falta recaudar</div>
+        <div class="hero-stat-value falta" id="h-falta">—</div>
+        <div class="hero-stat-sub">para llegar a la meta</div>
+      </div>
+    </div>
+    <div class="hero-bar-wrap">
+      <div class="hero-bar-header"><span>$0</span><span>Meta: $305.000.000</span></div>
+      <div class="hero-track"><div class="hero-fill" id="h-bar" style="width:0%"></div></div>
+    </div>
+    <div class="hero-sub-bars">
+      <div class="sub-bar-block">
+        <div class="sub-bar-header">
+          <span class="sub-bar-title">Zonas (26)</span>
+          <span class="sub-bar-pct" id="hp-zonas">—</span>
+        </div>
+        <div class="sub-track"><div class="sub-fill fill-rojo" id="hb-zonas" style="width:0%"></div></div>
+        <div class="sub-bar-amt" id="ha-zonas">—</div>
+      </div>
+      <div class="sub-bar-block">
+        <div class="sub-bar-header">
+          <span class="sub-bar-title">Consejo (20)</span>
+          <span class="sub-bar-pct" id="hp-consejo">—</span>
+        </div>
+        <div class="sub-track"><div class="sub-fill fill-verde" id="hb-consejo" style="width:0%"></div></div>
+        <div class="sub-bar-amt" id="ha-consejo">—</div>
+      </div>
+      <div class="sub-bar-block">
+        <div class="sub-bar-header">
+          <span class="sub-bar-title">Finanzas</span>
+          <span class="sub-bar-pct" id="hp-finanzas">—</span>
+        </div>
+        <div class="sub-track"><div class="sub-fill fill-morado" id="hb-finanzas" style="width:0%"></div></div>
+        <div class="sub-bar-amt" id="ha-finanzas">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('resumen',this)">Resumen</button>
+    <button class="tab" onclick="showTab('vias',this)">Por vía de recaudación</button>
+    <button class="tab" onclick="showTab('desglose',this)">Desglose por grupo</button>
+    <button class="tab" onclick="showTab('reales',this)">Ingresos reales</button>
+  </div>
+
+  <!-- ══════════ PESTAÑA 1: RESUMEN ══════════ -->
+  <section id="tab-resumen" class="section active">
+
+    <!-- Porcentajes grandes -->
+    <div class="pct-grid">
+      <div class="pct-card">
+        <div class="pct-card-label">Zonas (26) — Meta $156M</div>
+        <div class="pct-card-value" id="pct-zonas" style="color:var(--rojo)">—</div>
+        <div class="pct-card-track"><div class="pct-card-fill" id="pbar-zonas" style="width:0%;background:var(--rojo)"></div></div>
+        <div class="pct-card-sub" id="psub-zonas">—</div>
+      </div>
+      <div class="pct-card">
+        <div class="pct-card-label">Consejo (20) — Meta $80M</div>
+        <div class="pct-card-value" id="pct-consejo" style="color:var(--verde)">—</div>
+        <div class="pct-card-track"><div class="pct-card-fill" id="pbar-consejo" style="width:0%;background:var(--verde)"></div></div>
+        <div class="pct-card-sub" id="psub-consejo">—</div>
+      </div>
+      <div class="pct-card">
+        <div class="pct-card-label">Finanzas — Meta $40M</div>
+        <div class="pct-card-value" id="pct-finanzas" style="color:var(--morado)">—</div>
+        <div class="pct-card-track"><div class="pct-card-fill" id="pbar-finanzas" style="width:0%;background:var(--morado)"></div></div>
+        <div class="pct-card-sub" id="psub-finanzas">—</div>
+      </div>
+    </div>
+
+    <!-- Barras resumen grupos -->
+    <div class="section-sep">Zonas</div>
+    <div class="card">
+      <h3>26 zonas — Meta individual $6.000.000</h3>
+      <div class="bars-list" id="res-zonas-bars"></div>
+    </div>
+
+    <div class="section-sep">Consejo</div>
+    <div class="card">
+      <h3>Consejo — Meta individual $4.000.000</h3>
+      <div class="bars-list" id="res-consejo-bars"></div>
+    </div>
+
+    <div class="section-sep">Encargados de finanzas</div>
+    <div class="card">
+      <h3>Martín &amp; Flori — Meta $40.000.000</h3>
+      <div class="bars-list" id="res-finanzas-bars"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ PESTAÑA 2: POR VÍA ══════════ -->
+  <section id="tab-vias" class="section">
+
+    <!-- RIFAS -->
+    <div class="section-sep">Rifas</div>
+    <div class="metrics" id="met-rifas"></div>
+    <div class="card">
+      <h3>Rifas — Zonas</h3><div class="bars-list" id="v-rifas-zonas"></div>
+    </div>
+    <div class="card">
+      <h3>Rifas — Consejo</h3><div class="bars-list" id="v-rifas-consejo"></div>
+    </div>
+    <div class="card">
+      <h3>Rifas — Martín &amp; Flori</h3><div class="bars-list" id="v-rifas-finanzas"></div>
+    </div>
+
+    <!-- COLECTAS -->
+    <div class="section-sep">Colectas</div>
+    <div class="metrics" id="met-colectas"></div>
+    <div class="card">
+      <h3>Colectas — Zonas</h3><div class="bars-list" id="v-col-zonas"></div>
+    </div>
+    <div class="card">
+      <h3>Colectas — Consejo</h3><div class="bars-list" id="v-col-consejo"></div>
+    </div>
+    <div class="card">
+      <h3>Colectas — Martín &amp; Flori</h3><div class="bars-list" id="v-col-finanzas"></div>
+    </div>
+
+    <!-- DONACIONES C/CERT -->
+    <div class="section-sep">Donaciones con certificado tributario</div>
+    <div class="metrics" id="met-don"></div>
+    <div class="card">
+      <h3>Donaciones c/cert. — Zonas</h3><div class="bars-list" id="v-don-zonas"></div>
+    </div>
+    <div class="card">
+      <h3>Donaciones c/cert. — Consejo</h3><div class="bars-list" id="v-don-consejo"></div>
+    </div>
+    <div class="card">
+      <h3>Donaciones c/cert. — Martín &amp; Flori</h3><div class="bars-list" id="v-don-finanzas"></div>
+    </div>
+
+    <!-- APORTES SIMPLES -->
+    <div class="section-sep">Aportes simples</div>
+    <div class="metrics" id="met-aportes"></div>
+    <div class="card">
+      <h3>Aportes simples — Zonas</h3><div class="bars-list" id="v-ap-zonas"></div>
+    </div>
+    <div class="card">
+      <h3>Aportes simples — Consejo</h3><div class="bars-list" id="v-ap-consejo"></div>
+    </div>
+    <div class="card">
+      <h3>Aportes simples — Martín &amp; Flori</h3><div class="bars-list" id="v-ap-finanzas"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ PESTAÑA 3: DESGLOSE POR GRUPO ══════════ -->
+  <section id="tab-desglose" class="section">
+
+    <!-- Sub-tabs para elegir grupo -->
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="showInner('zonas-panel',this)">Zonas</button>
+      <button class="inner-tab" onclick="showInner('consejo-panel',this)">Consejo</button>
+      <button class="inner-tab" onclick="showInner('finanzas-panel',this)">Encargados de finanzas</button>
+    </div>
+
+    <!-- Panel Zonas -->
+    <div class="inner-panel active" id="zonas-panel">
+      <div id="zonas-desglose-cards"></div>
+    </div>
+
+    <!-- Panel Consejo -->
+    <div class="inner-panel" id="consejo-panel">
+      <div id="consejo-desglose-cards"></div>
+    </div>
+
+    <!-- Panel Finanzas -->
+    <div class="inner-panel" id="finanzas-panel">
+      <div id="finanzas-desglose-cards"></div>
+    </div>
+  </section>
+
+
+  <!-- ══════════ PESTAÑA 4: INGRESOS REALES ══════════ -->
+  <section id="tab-reales" class="section">
+
+    <!-- Resumen grande -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1.25rem;">
+      <div class="card" style="margin-bottom:0;border-left:4px solid var(--azul);">
+        <div class="metric-label">Ingresado en Excel — Consejo</div>
+        <div class="metric-value" style="font-size:32px;color:var(--azul)">$76,5M</div>
+        <div class="metric-sub">Monto total registrado</div>
+      </div>
+      <div class="card" style="margin-bottom:0;border-left:4px solid var(--verde);">
+        <div class="metric-label">Realmente cobrado — Consejo</div>
+        <div class="metric-value" style="font-size:32px;color:var(--verde)">$54,2M</div>
+        <div class="metric-sub">Depositado en cuenta TP</div>
+      </div>
+      <div class="card" style="margin-bottom:0;border-left:4px solid var(--rojo);">
+        <div class="metric-label">Pendiente de cobrar</div>
+        <div class="metric-value" style="font-size:32px;color:var(--rojo)">$20,65M</div>
+        <div class="metric-sub">Prometido pero no depositado</div>
+      </div>
+    </div>
+
+    <!-- Barra visual diferencia -->
+    <div class="card">
+      <h3>Excel vs realidad — Consejo</h3>
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--texto-sec);margin-bottom:5px;">
+          <span>Cobrado: $54.196.029</span>
+          <span>Excel: $76.510.685</span>
+        </div>
+        <div style="height:14px;background:var(--crema-dark);border-radius:99px;overflow:hidden;position:relative;">
+          <div style="position:absolute;left:0;top:0;height:100%;width:70.8%;background:var(--verde);border-radius:99px;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-top:5px;">
+          <span style="color:var(--verde);font-weight:600;">70,8% cobrado</span>
+          <span style="color:var(--rojo);font-weight:600;">29,2% pendiente</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla donaciones pendientes -->
+    <div class="section-sep">Donaciones comprometidas pero no depositadas</div>
+    <div class="card">
+      <h3>Pendientes de cobro — Consejo</h3>
+      <p style="font-size:12px;color:var(--texto-sec);margin-bottom:14px;">Donaciones registradas en el Excel donde el depósito aún no se ha confirmado en la cuenta de Trabajo País.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="border-bottom:2px solid var(--crema-dark);">
+            <th style="text-align:left;padding:6px 8px 10px 0;color:var(--texto-sec);font-weight:600;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;">Integrante</th>
+            <th style="text-align:left;padding:6px 8px 10px;color:var(--texto-sec);font-weight:600;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;">Empresa / Persona</th>
+            <th style="text-align:right;padding:6px 0 10px 8px;color:var(--texto-sec);font-weight:600;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;">Monto</th>
+          </tr>
+        </thead>
+        <tbody id="pendientes-tbody"></tbody>
+      </table>
+        <span style="font-family:'Oswald',sans-serif;font-size:13px;font-weight:500;color:var(--texto-sec);text-transform:uppercase;letter-spacing:0.05em;">Total pendiente</span>
+        <span style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--rojo);">$20.650.000</span>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer class="footer">Trabajo País 2026 · Datos al 4 de junio de 2026</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATOS
+// ═══════════════════════════════════════════════════════
+
+const zonas = [
+  { nombre:"La Gruta",             rifas:9774,   aportes:2384000, donaciones:2000000, colectas:0,       meta:6000000 },
+  { nombre:"Pangue Abajo",         rifas:48869,  aportes:2532500, donaciones:500000,  colectas:0,       meta:6000000 },
+  { nombre:"Nuevo Reino",          rifas:107608, aportes:1367500, donaciones:1000000, colectas:142029,  meta:6000000 },
+  { nombre:"Pantanillo",           rifas:0,      aportes:1575000, donaciones:700000,  colectas:0,       meta:6000000 },
+  { nombre:"El Maitén",            rifas:183960, aportes:2060000, donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"Allipén",              rifas:111587, aportes:5000,    donaciones:2000000, colectas:0,       meta:6000000 },
+  { nombre:"Los Laureles",         rifas:97834,  aportes:1380000, donaciones:500000,  colectas:0,       meta:6000000 },
+  { nombre:"N. Sra. Guadalupe",    rifas:0,      aportes:1055000, donaciones:400000,  colectas:0,       meta:6000000 },
+  { nombre:"La Portada",           rifas:0,      aportes:1060000, donaciones:250000,  colectas:0,       meta:6000000 },
+  { nombre:"Ranchillo Adentro",    rifas:107561, aportes:1115000, donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"Curaleufú",            rifas:119242, aportes:230000,  donaciones:650000,  colectas:211035,  meta:6000000 },
+  { nombre:"Las Cañas",            rifas:11748,  aportes:151000,  donaciones:1000000, colectas:0,       meta:6000000 },
+  { nombre:"La Conchina",          rifas:0,      aportes:0,       donaciones:1100000, colectas:0,       meta:6000000 },
+  { nombre:"Casa de Lata",         rifas:146706, aportes:500672,  donaciones:250000,  colectas:112444,  meta:6000000 },
+  { nombre:"La Punta",             rifas:70411,  aportes:439000,  donaciones:500000,  colectas:0,       meta:6000000 },
+  { nombre:"Guayacán",             rifas:7819,   aportes:770000,  donaciones:0,       colectas:152730,  meta:6000000 },
+  { nombre:"Lefincul",             rifas:45103,  aportes:803000,  donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"Maullín",              rifas:19548,  aportes:657222,  donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"Los Corrales",         rifas:0,      aportes:495000,  donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"San Lorenzo",          rifas:0,      aportes:460000,  donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"El Tártaro",           rifas:7838,   aportes:263000,  donaciones:0,       colectas:142030,  meta:6000000 },
+  { nombre:"Chan Chan",            rifas:0,      aportes:335000,  donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"San Rafael",           rifas:0,      aportes:266000,  donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"El Yacal",             rifas:43063,  aportes:225000,  donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"Manantiales",          rifas:9822,   aportes:251500,  donaciones:0,       colectas:0,       meta:6000000 },
+  { nombre:"Los Cardones",         rifas:3929,   aportes:274500,  donaciones:0,       colectas:0,       meta:6000000 },
+];
+zonas.forEach(z => z.total = z.rifas + z.aportes + z.donaciones + z.colectas);
+
+const consejo = [
+  { nombre:"Agustín Sánchez",    rifas:0,     aportes:40000,   donaciones:8228200, colectas:0,       meta:4000000 },
+  { nombre:"Fede López",         rifas:0,     aportes:0,       donaciones:5900000, colectas:155672,  meta:4000000 },
+  { nombre:"Clemente Cisneros",  rifas:0,     aportes:0,       donaciones:5250000, colectas:0,       meta:4000000 },
+  { nombre:"Juan Diego Herrera", rifas:0,     aportes:0,       donaciones:3500000, colectas:0,       meta:4000000 },
+  { nombre:"Clemente Arrieta",   rifas:1964,  aportes:0,       donaciones:3050000, colectas:0,       meta:4000000 },
+  { nombre:"Agu Cases",          rifas:0,     aportes:730000,  donaciones:2000000, colectas:179396,  meta:4000000 },
+  { nombre:"Seba Novoa",         rifas:0,     aportes:0,       donaciones:2000000, colectas:116755,  meta:4000000 },
+  { nombre:"Alfonso Besa",       rifas:0,     aportes:350000,  donaciones:1500000, colectas:42960,   meta:4000000 },
+  { nombre:"Maca Poblete",       rifas:33327, aportes:0,       donaciones:1000000, colectas:359279,  meta:4000000 },
+  { nombre:"Pedro Ruiz-Tagle",   rifas:0,     aportes:0,       donaciones:1000000, colectas:43145,   meta:4000000 },
+  { nombre:"Jesu Ledezma",       rifas:1955,  aportes:600000,  donaciones:0,       colectas:85893,   meta:4000000 },
+  { nombre:"Josefa Errázuriz",   rifas:0,     aportes:0,       donaciones:500000,  colectas:43145,   meta:4000000 },
+  { nombre:"Cristóbal Correa",   rifas:99694, aportes:485000,  donaciones:0,       colectas:0,       meta:4000000 },
+  { nombre:"Javi Ebensperger",   rifas:0,     aportes:340000,  donaciones:0,       colectas:222541,  meta:4000000 },
+  { nombre:"Fran Abumohor",      rifas:0,     aportes:510001,  donaciones:0,       colectas:73610,   meta:4000000 },
+  { nombre:"Flopi Martínez",     rifas:19566, aportes:200000,  donaciones:0,       colectas:73610,   meta:4000000 },
+  { nombre:"Jeremy Escalona",    rifas:0,     aportes:104000,  donaciones:0,       colectas:222356,  meta:4000000 },
+  { nombre:"Isi Cheyre",         rifas:0,     aportes:242000,  donaciones:0,       colectas:0,       meta:4000000 },
+  { nombre:"Agu Soza",           rifas:1955,  aportes:100000,  donaciones:0,       colectas:0,       meta:4000000 },
+  { nombre:"Agu Letelier",       rifas:0,     aportes:0,       donaciones:0,       colectas:73611,   meta:4000000 },
+];
+consejo.forEach(c => c.total = c.rifas + c.aportes + c.donaciones + c.colectas);
+
+const finanzas = [
+  { nombre:"Martín - Flori", rifas:3693, aportes:215000, donaciones:36370000, colectas:432357, meta:40000000 },
+];
+finanzas.forEach(f => f.total = f.rifas + f.aportes + f.donaciones + f.colectas);
+
+const META_ZONAS    = 156000000;
+const META_CONSEJO  = 80000000;
+const META_FINANZAS = 40000000;
+const META_TOTAL    = 305000000;
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function fmt(n) {
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000)    return '$' + Math.round(n/1000) + 'K';
+  return '$' + Math.round(n);
+}
+function pct(v, m) { return Math.round(v / m * 100); }
+function barColor(p) {
+  if (p >= 100) return '#1a7a4a';
+  if (p >= 50)  return '#14569c';
+  if (p >= 25)  return '#c47a00';
+  return '#d61d26';
+}
+function sum(arr, key) { return arr.reduce((s, x) => s + (x[key] || 0), 0); }
+
+// ═══════════════════════════════════════════
+// COUNTDOWN
+// ═══════════════════════════════════════════
+(function () {
+  const diff = Math.ceil((new Date('2026-07-09') - new Date()) / 86400000);
+  const d = diff > 0 ? diff : 0;
+  document.getElementById('days-left').textContent = d;
+  document.getElementById('days-hero').textContent = d;
+})();
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function showTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function showInner(panelId, btn) {
+  document.querySelectorAll('.inner-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(panelId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// HERO
+// ═══════════════════════════════════════════
+function renderHero() {
+  const totZ = sum(zonas, 'total');
+  const totC = sum(consejo, 'total');
+  const totF = sum(finanzas, 'total');
+  const totT = totZ + totC + totF;
+  const falta = META_TOTAL - totT;
+  const pctT  = pct(totT, META_TOTAL);
+
+  document.getElementById('h-recaudado').textContent = fmt(totT);
+  document.getElementById('h-rec-sub').textContent   = 'de $305.000.000 meta';
+  document.getElementById('h-pct').textContent       = pctT + '%';
+  document.getElementById('h-falta').textContent     = fmt(falta);
+  document.getElementById('h-bar').style.width       = Math.min(pctT, 100) + '%';
+
+  // Sub-barras hero
+  const pZ = pct(totZ, META_ZONAS);
+  document.getElementById('hp-zonas').textContent   = pZ + '%';
+  document.getElementById('hb-zonas').style.width   = Math.min(pZ, 100) + '%';
+  document.getElementById('ha-zonas').textContent   = fmt(totZ) + ' de ' + fmt(META_ZONAS);
+
+  const pC = pct(totC, META_CONSEJO);
+  document.getElementById('hp-consejo').textContent = pC + '%';
+  document.getElementById('hb-consejo').style.width = Math.min(pC, 100) + '%';
+  document.getElementById('ha-consejo').textContent = fmt(totC) + ' de ' + fmt(META_CONSEJO);
+
+  const pF = pct(totF, META_FINANZAS);
+  document.getElementById('hp-finanzas').textContent = pF + '%';
+  document.getElementById('hb-finanzas').style.width  = Math.min(pF, 100) + '%';
+  document.getElementById('ha-finanzas').textContent  = fmt(totF) + ' de ' + fmt(META_FINANZAS);
+
+  // Porcentajes grandes pestaña 1
+  document.getElementById('pct-zonas').textContent     = pZ + '%';
+  document.getElementById('pbar-zonas').style.width    = Math.min(pZ, 100) + '%';
+  document.getElementById('psub-zonas').textContent    = fmt(totZ) + ' recaudado · falta ' + fmt(META_ZONAS - totZ);
+
+  document.getElementById('pct-consejo').textContent   = pC + '%';
+  document.getElementById('pbar-consejo').style.width  = Math.min(pC, 100) + '%';
+  document.getElementById('psub-consejo').textContent  = fmt(totC) + ' recaudado · falta ' + fmt(META_CONSEJO - totC);
+
+  document.getElementById('pct-finanzas').textContent  = pF + '%';
+  document.getElementById('pbar-finanzas').style.width = Math.min(pF, 100) + '%';
+  document.getElementById('psub-finanzas').textContent = fmt(totF) + ' recaudado · falta ' + fmt(META_FINANZAS - totF);
+}
+
+// ═══════════════════════════════════════════
+// BARRAS — totales con % de meta
+// ═══════════════════════════════════════════
+function renderBars(items, id) {
+  const sorted = [...items].sort((a, b) => b.total - a.total);
+  document.getElementById(id).innerHTML = sorted.map((item, i) => {
+    const p   = pct(item.total, item.meta);
+    const col = barColor(p);
+    return `<div class="bar-row">
+      <span class="bar-rank">${i + 1}</span>
+      <span class="bar-name" title="${item.nombre}">${item.nombre}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(p,100)}%;background:${col}"></div></div>
+      <span class="bar-pct" style="color:${col}">${p}%</span>
+      <span class="bar-amt">${fmt(item.total)}</span>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// BARRAS — categoría (proporcional al máximo)
+// ═══════════════════════════════════════════
+function renderCatBars(items, id, key) {
+  const sorted = [...items].sort((a, b) => (b[key] || 0) - (a[key] || 0)).filter(x => (x[key] || 0) > 0);
+  if (!sorted.length) {
+    document.getElementById(id).innerHTML = '<p style="font-size:13px;color:var(--texto-sec);padding:6px 0">Sin registros en esta categoría.</p>';
+    return;
+  }
+  const maxV = sorted[0][key];
+  document.getElementById(id).innerHTML = sorted.map((item, i) => {
+    const v = item[key] || 0;
+    const w = Math.round(v / maxV * 100);
+    return `<div class="bar-row">
+      <span class="bar-rank">${i + 1}</span>
+      <span class="bar-name" title="${item.nombre}">${item.nombre}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:#14569c"></div></div>
+      <span class="bar-pct" style="color:#14569c">${fmt(v)}</span>
+      <span class="bar-amt">&nbsp;</span>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// MÉTRICAS DE CATEGORÍA
+// ═══════════════════════════════════════════
+function metCard(lbl, val, sub, cls) {
+  return `<div class="metric"><div class="metric-label">${lbl}</div><div class="metric-value ${cls}">${val}</div><div class="metric-sub">${sub}</div></div>`;
+}
+
+function renderMetCat(id, key) {
+  const vZ = sum(zonas, key);
+  const vC = sum(consejo, key);
+  const vF = sum(finanzas, key);
+  document.getElementById(id).innerHTML = [
+    metCard('Total', fmt(vZ + vC + vF), 'Todos los grupos', ''),
+    metCard('Zonas', fmt(vZ), 'Total 26 zonas', 'red'),
+    metCard('Consejo', fmt(vC), 'Total 20 integrantes', 'green'),
+    metCard('Finanzas', fmt(vF), 'Martín & Flori', 'morado'),
+  ].join('');
+}
+
+// ═══════════════════════════════════════════
+// DESGLOSE POR GRUPO — card por persona/zona
+// ═══════════════════════════════════════════
+function renderDesgloseCards(items, containerId) {
+  const sorted = [...items].sort((a, b) => b.total - a.total);
+  const cats = [
+    { key:'donaciones', label:'Donaciones c/cert.', color:'#14569c' },
+    { key:'aportes',    label:'Aportes simples',    color:'#c47a00' },
+    { key:'colectas',   label:'Colectas',           color:'#1a7a4a' },
+    { key:'rifas',      label:'Rifas',              color:'#d61d26' },
+  ];
+
+  document.getElementById(containerId).innerHTML = sorted.map(item => {
+    const p   = pct(item.total, item.meta);
+    const col = barColor(p);
+
+    const catBars = cats.map(cat => {
+      const v = item[cat.key] || 0;
+      if (v === 0) return '';
+      const w = Math.round(v / item.total * 100);
+      return `<div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
+        <span style="font-size:11px;color:var(--texto-sec);min-width:140px;">${cat.label}</span>
+        <div style="flex:1;height:6px;background:var(--crema-dark);border-radius:99px;overflow:hidden;">
+          <div style="width:${w}%;height:100%;border-radius:99px;background:${cat.color}"></div>
+        </div>
+        <span style="font-size:11px;font-family:'Oswald',sans-serif;color:${cat.color};min-width:60px;text-align:right;">${fmt(v)}</span>
+      </div>`;
+    }).join('');
+
+    return `<div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+        <h3 style="margin-bottom:0">${item.nombre}</h3>
+        <span style="font-family:'Oswald',sans-serif;font-size:20px;font-weight:600;color:${col}">${p}% · ${fmt(item.total)}</span>
+      </div>
+      <div style="height:7px;background:var(--crema-dark);border-radius:99px;overflow:hidden;margin-bottom:10px;">
+        <div style="width:${Math.min(p,100)}%;height:100%;border-radius:99px;background:${col}"></div>
+      </div>
+      ${catBars}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+renderHero();
+
+// Pestaña 1 — Resumen
+renderBars(zonas,    'res-zonas-bars');
+renderBars(consejo,  'res-consejo-bars');
+renderBars(finanzas, 'res-finanzas-bars');
+
+// Pestaña 2 — Por vía
+renderMetCat('met-rifas',    'rifas');
+renderCatBars(zonas,    'v-rifas-zonas',    'rifas');
+renderCatBars(consejo,  'v-rifas-consejo',  'rifas');
+renderCatBars(finanzas, 'v-rifas-finanzas', 'rifas');
+
+renderMetCat('met-colectas', 'colectas');
+renderCatBars(zonas,    'v-col-zonas',    'colectas');
+renderCatBars(consejo,  'v-col-consejo',  'colectas');
+renderCatBars(finanzas, 'v-col-finanzas', 'colectas');
+
+renderMetCat('met-don',      'donaciones');
+renderCatBars(zonas,    'v-don-zonas',    'donaciones');
+renderCatBars(consejo,  'v-don-consejo',  'donaciones');
+renderCatBars(finanzas, 'v-don-finanzas', 'donaciones');
+
+renderMetCat('met-aportes',  'aportes');
+renderCatBars(zonas,    'v-ap-zonas',    'aportes');
+renderCatBars(consejo,  'v-ap-consejo',  'aportes');
+renderCatBars(finanzas, 'v-ap-finanzas', 'aportes');
+
+// Pestaña 3 — Desglose por grupo
+renderDesgloseCards(zonas,    'zonas-desglose-cards');
+renderDesgloseCards(consejo,  'consejo-desglose-cards');
+renderDesgloseCards(finanzas, 'finanzas-desglose-cards');
+
+// ═══════════════════════════════════════════
+// INGRESOS REALES — pendientes de cobro
+// ═══════════════════════════════════════════
+const pendientes = [
+  { integrante:"Clemente Cisneros", donante:"Enrique Elgueta",                tipo:"Empresa", monto:3000000, depositado:false },
+  { integrante:"Maca Poblete",      donante:"José Miguel Ureta",              tipo:"Empresa", monto:1000000, depositado:false },
+  { integrante:"Alfonso Besa",      donante:"Antonio Peña",                   tipo:"Empresa", monto:1000000, depositado:false },
+  { integrante:"Pedro Ruíz-Tagle",  donante:"Barros y Errazuriz",             tipo:"Empresa", monto:1000000, depositado:false },
+  { integrante:"Juan Diego Herrera",donante:"Embonor",                        tipo:"Empresa", monto:3500000, depositado:false },
+  { integrante:"Fede López",        donante:"SKC",                            tipo:"Empresa", monto:2500000, depositado:false },
+  { integrante:"Fede López",        donante:"GRUPO GTD",                      tipo:"Empresa", monto:1000000, depositado:false },
+  { integrante:"Fede López",        donante:"Empresas Agrotop",               tipo:"Empresa", monto:400000,  depositado:false },
+  { integrante:"Fede López",        donante:"Tonalli de Chile SpA",           tipo:"Empresa", monto:1000000, depositado:false },
+  { integrante:"Agustín Sánchez",   donante:"AFP Hábitat",                    tipo:"Empresa", monto:8078200, depositado:true  },
+  { integrante:"Josefa Errázuriz",  donante:"Anónimo",                        tipo:"Empresa", monto:500000,  depositado:false },
+  { integrante:"Seba Novoa",        donante:"Cial",                           tipo:"Empresa", monto:2000000, depositado:false },
+];
+
+(function renderPendientes() {
+  const tbody = document.getElementById('pendientes-tbody');
+  if (!tbody) return;
+  const soloNoCobrados = pendientes.filter(p => !p.depositado);
+  tbody.innerHTML = soloNoCobrados.map((p, i) => `
+    <tr style="border-bottom:1px solid var(--crema-dark);">
+      <td style="padding:8px 8px 8px 0;color:var(--texto);font-weight:500;">${p.integrante}</td>
+      <td style="padding:8px;color:var(--texto);">${p.donante}</td>
+      <td style="padding:8px;color:var(--texto-sec);">${p.tipo}</td>
+      <td style="padding:8px 0 8px 8px;text-align:right;font-family:'Oswald',sans-serif;font-weight:600;color:var(--rojo);">$${p.monto.toLocaleString('es-CL')}</td>
+
+    </tr>`).join('');
+})();
+
+</script>
+</body>
+</html>
