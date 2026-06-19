@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Error en el pago · Trabajo País 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f5f7;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  .icon-wrap {
+    width: 72px;
+    height: 72px;
+    background: #fff1f1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+
+  .icon-wrap svg { width: 36px; height: 36px; }
+
+  .title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.75rem;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .info-box {
+    background: #fff1f1;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .info-box p { font-size: 13px; color: #b91c1c; line-height: 1.6; }
+  .info-box strong { font-weight: 600; }
+
+  .btn-primary {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    background: #14569c;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    margin-bottom: 0.75rem;
+    transition: background 0.15s;
+  }
+
+  .btn-primary:hover { background: #0e3d72; }
+
+  .btn-secondary {
+    display: block;
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: #6b7280;
+    font-size: 15px;
+    font-weight: 500;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .btn-secondary:hover { border-color: #9ca3af; color: #374151; }
+
+  .error-code {
+    margin-top: 2rem;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="icon-wrap">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" fill="#fee2e2"/>
+      <path d="M12 7v5" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="12" cy="16.5" r="1.25" fill="#ef4444"/>
+    </svg>
+  </div>
+
+  <h1 class="title">No pudimos procesar tu pago</h1>
+
+  <p class="subtitle">
+    Ocurrió un problema al intentar completar la transacción.<br>
+    Tu cuenta no ha sido cobrada.
+  </p>
+
+  <div class="info-box">
+    <p><strong>¿Qué puede haber pasado?</strong><br>
+       · Fondos insuficientes en la cuenta<br>
+       · Datos de la tarjeta incorrectos<br>
+       · El banco rechazó la transacción<br>
+       · Problema temporal de conexión</p>
+  </div>
+
+  <a href="https://app.payku.cl/botonpago/index?qr=ku32047-verif-964cec0f" class="btn-primary">
+    Intentar nuevamente
+  </a>
+
+  <p class="error-code">Si el problema persiste, escríbenos a <a href="mailto:finanzas@trabajopais.cl" style="color:#14569c;font-weight:600;text-decoration:none;">finanzas@trabajopais.cl</a> y te ayudaremos a completar tu donación.</p>
+
+</div>
+
+</body>
+</html>
